@@ -1,0 +1,15 @@
+# Зависимости разработки
+node_modules/
+npm-debug.log*
+.npm/
+
+# Локальные черновики и служебные файлы
+*.local
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+
+# Дампы прошивок и бинарники в репозиторий не попадают: см. SECURITY.md
+*.rom
+*.vbi

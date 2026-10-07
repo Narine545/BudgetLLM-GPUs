@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Как устроены данные
+    url: https://github.com/Narine545/BudgetLLM-GPUs/blob/main/docs/SCHEMA.md
+    about: Схема карточек, инструментов, сборок и гайдов — с чего начать
+  - name: Правила участия
+    url: https://github.com/Narine545/BudgetLLM-GPUs/blob/main/CONTRIBUTING.md
+    about: Какие вклады принимаются и какие требования к замерам

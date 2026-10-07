@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BudgetLLM GPUs — база знаний по бюджетным картам для локального инференса</title>
+<meta name="description" content="Офлайн-база знаний по нишевым GPU для локального запуска LLM: майнинговые CMP/P102, Tesla P40/P100/V100, AMD Instinct MI50, BC-250, китайские моды VRAM. Реальные тесты, разблокировки прошивок, сборки на X99.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f7f1e7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#181614" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="website">
+<meta property="og:title" content="BudgetLLM GPUs — база нишевых GPU для локального инференса LLM">
+<meta property="og:description" content="Майнинговые CMP и P10x, Tesla, Instinct, BC-250, моды VRAM: что открывается разблокировкой, а что остаётся ограничением. 92 замера из реальных сборок.">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary">
+<meta name="referrer" content="no-referrer">
+<!--
+  Политика безопасности контента (CSP).
+  Приложение полностью офлайновое: никаких сетевых запросов, телеметрии и внешних CDN.
+  script-src содержит 'self' (http/https, GitHub Pages) и file: (запуск двойным щелчком по index.html).
+-->
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; img-src 'self' file: data:; font-src 'self' file: data:; connect-src 'none'; media-src 'none'; worker-src 'none'; manifest-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'">
+<link rel="stylesheet" href="assets/css/styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23a4503a'/%3E%3Cpath d='M9 21V11h3.2l3.8 6 3.8-6H23v10h-2.6v-6.1l-3.4 5.3h-1.9l-3.4-5.3V21z' fill='%23fff9f2'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<div id="boot-fallback" role="status">
+  <h2>Скрипты не запустились</h2>
+  <p>Эта база — обычный офлайн-сайт без интернета и серверов. Если вы видите это сообщение, браузер заблокировал локальные скрипты.</p>
+  <ul>
+    <li>Запустите локальный сервер: <code>python3 serve.py</code> (или <code>./start.sh</code>), затем откройте <code>http://localhost:8080</code>.</li>
+    <li>Либо откройте <code>index.html</code> в Firefox/Chrome без расширений, блокирующих скрипты на <code>file://</code>.</li>
+  </ul>
+</div>
+
+<a class="skip-link" href="#main">Перейти к содержимому</a>
+
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="40" height="40"><rect width="40" height="40" rx="9" fill="var(--accent)"/><path d="M11 27V13h4l5 7.6 5-7.6h4v14h-3.3v-8.4L21.4 26h-2.8L14.3 18.6V27z" fill="#fffaf4"/></svg>
+      </div>
+      <div>
+        <h1>BudgetLLM&nbsp;GPUs</h1>
+        <p class="tagline">База знаний: нишевые, майнинговые и профессиональные карты для домашнего локального инференса</p>
+      </div>
+    </div>
+
+    <div class="masthead-side">
+      <dl class="hero-stats" id="hero-stats" aria-label="Сводка по базе"></dl>
+      <div class="masthead-controls">
+        <div class="lang-switch" id="lang-switch" role="group" aria-label="Язык интерфейса"></div>
+        <button type="button" class="btn btn-ghost theme-toggle" id="theme-toggle" aria-label="Переключить тему">
+          <span class="theme-icon" aria-hidden="true">◐</span><span class="theme-label">Тема</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="tabs wrap" id="tabs" aria-label="Разделы базы">
+    <a href="#/catalog" data-route="catalog">Каталог карт</a>
+    <a href="#/compare" data-route="compare">Сравнение</a>
+    <a href="#/picker" data-route="picker">Подбор под модель</a>
+    <a href="#/builds" data-route="builds">Сборки</a>
+    <a href="#/guides" data-route="guides">Гайды</a>
+    <a href="#/mods" data-route="mods">Прошивки и моды</a>
+    <a href="#/sources" data-route="sources">Источники</a>
+    <a href="#/about" data-route="about">О базе</a>
+  </nav>
+</header>
+
+<main id="main" class="wrap" tabindex="-1">
+  <section id="view" class="view" aria-live="off"></section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <p>
+      Данные собраны из публичных отчётов сообщества (GitHub, Reddit, форумы, блоги) и проверялись вручную.
+      Каждая цифра снабжена ссылкой на первоисточник. Оценки, а не результаты замеров, помечены явно.
+    </p>
+    <p class="footer-meta">
+      <span id="footer-version"></span> · Лицензия CC0-1.0 · Работает офлайн, без интернета и без телеметрии
+    </p>
+  </div>
+</footer>
+
+<!-- Данные (обычные скрипты: работают и на file://, и по http). Порядок важен: сначала meta, затем карты. -->
+<script src="assets/data/meta.js"></script>
+<script src="assets/data/tools.js"></script>
+<script src="assets/data/gpus-nvidia-mining.js"></script>
+<script src="assets/data/gpus-nvidia-tesla.js"></script>
+<script src="assets/data/gpus-amd.js"></script>
+<script src="assets/data/gpus-intel-and-mods.js"></script>
+<script src="assets/data/builds.js"></script>
+<script src="assets/data/guides.js"></script>
+
+<!-- Словари других языков и рантайм локализации. Русский — исходный язык:
+     тексты лежат прямо в данных, а словари сопоставляют им переводы. -->
+<script src="assets/i18n/en.js"></script>
+<script src="assets/i18n/zh.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

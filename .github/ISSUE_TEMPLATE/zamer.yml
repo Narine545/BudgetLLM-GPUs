@@ -1,0 +1,61 @@
+name: Замер скорости
+description: Прислать результат прогона модели на нишевой карте
+title: "[Замер] "
+labels: ["данные", "замер"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо! Один замер с реального стенда — это самое ценное, что можно добавить в базу.
+        Оценка по формуле не подойдёт: такие строки помечаются отдельно и считаются автоматически.
+  - type: input
+    id: gpu
+    attributes:
+      label: Карта
+      placeholder: Tesla P40 24 ГБ (или 2× CMP 100-210, или BC-250)
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Модель и квантизация
+      placeholder: Qwen3.6-27B Q4_K_M (GGUF)
+    validations:
+      required: true
+  - type: input
+    id: ctx
+    attributes:
+      label: Длина контекста и бэкенд
+      placeholder: 32768, llama.cpp (CUDA, build b6543)
+    validations:
+      required: true
+  - type: textarea
+    id: numbers
+    attributes:
+      label: Цифры
+      description: Генерация (tg / tok-s) и prefill (pp / prompt eval), а также команду или настройки, если она сохранилась
+      placeholder: |
+        tg128 = 38.2 tok/s
+        pp512 = 2994 tok/s
+        команда: llama-bench -m ... -ngl 99 -fa
+    validations:
+      required: true
+  - type: textarea
+    id: rig
+    attributes:
+      label: Остальное железо
+      placeholder: X99 (Huananzhi F8), E5-2680 v4, 128 ГБ DDR4, Ubuntu 24.04, драйвер 580.65
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Ссылка на отчёт (если есть)
+      description: Пост, issue, лог, скриншот — что угодно, что можно проверить
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Подтверждение
+      options:
+        - label: Это замер на моём железе, а не пересказ чужого отчёта
+        - label: Понимаю, что данные попадут в открытый репозиторий под CC0-1.0
