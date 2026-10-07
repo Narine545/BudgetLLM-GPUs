@@ -1,0 +1,36 @@
+name: Исправление данных
+description: Что-то в базе неверно, устарело или вводит в заблуждение
+title: "[Правка] "
+labels: ["данные"]
+body:
+  - type: input
+    id: where
+    attributes:
+      label: Где именно
+      description: Карта, инструмент, гайд — или строка в assets/data/*.js
+      placeholder: gpus-nvidia-mining.js → cmp-170hx → memory.measuredBandwidth
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: Что не так
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Источник, который подтверждает исправление
+      description: Ссылка на отчёт, документацию или собственный прогон
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Тип правки
+      options:
+        - Ошибка в характеристиках
+        - Устаревшая цена или статус разблокировки
+        - Неверный источник в реестре
+        - Сломанная ссылка
+        - Опасная формулировка без предупреждения
