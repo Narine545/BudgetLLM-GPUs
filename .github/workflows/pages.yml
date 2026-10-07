@@ -16,20 +16,39 @@ concurrency:
 
 jobs:
   build:
+    name: Сборка статики и проверка данных
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Валидация данных перед публикацией
+
+      - name: Проверка целостности данных
         run: node tools/validate.js
+
+      - name: Собрать только то, что нужно сайту
+        run: |
+          mkdir -p _site
+          cp -r index.html assets _site/
+          cp README.md LICENSE SECURITY.md _site/
+          touch _site/.nojekyll
+          # в артефакт не должны попасть служебные каталоги и данные разработки
+
+      - name: Убедиться, что внешних ресурсов нет
+        run: |
+          if grep -nE '<(script|link|img|iframe)[^>]+(src|href)="https?://' _site/index.html; then
+            echo "::error::index.html тянет внешние ресурсы — база обязана работать офлайн"
+            exit 1
+          fi
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
   deploy:
+    name: Публикация
     needs: build
     runs-on: ubuntu-latest
     environment:
