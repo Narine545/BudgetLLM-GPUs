@@ -30,11 +30,12 @@ BLDL.gpus.push(
     { model: "Llama 2 7B", quant: "Q4_0", ctx: 4096, backend: "llama.cpp (CUDA, FA off)", rig: "1×P4", tg: 33.1, pp: 514.5, src: "scoreboard-cuda", confidence: "measured" },
     { model: "Llama 3.2 3B", quant: "Q4", ctx: 4096, backend: "Ollama", rig: "1×P4 (сравнение с 4×P40)", tg: 34.8, pp: null, src: "tinycomputers", confidence: "estimated", note: "Пропорциональная оценка по 4×P40 (94.3 ток/с на 4 картах) — прямого замера на одиночной P4 нет" }
   ],
-  prices: { low: 130, high: 240, updated: "2026-10", currency: "USD", volatility: "средняя", note: "Цена сильно разнится: $171 на eBay против $240 в рознице. Для карты 2016 года это дорого, но альтернатив с 75 Вт нет.", history: [{ date: "2024-10", price: 130, label: "" }, { date: "2026-10", price: 185, label: "текущий ориентир" }] },
+  prices: { low: 60, high: 240, updated: "2026-10", currency: "USD", volatility: "высокая", note: "Рынки разошлись вдвое: в Китае карта упала до ¥270–360 (это $40–50 и, судя по обсуждениям, стало новой нормой), на западных площадках держится $130–240. Для 75-ваттной карты с 8 ГБ и без видеовыхода $240 — переплата.", history: [{ date: "2024-10", price: 130, label: "" }, { date: "2025-06", price: 45, label: "обвал в Китае: ¥300" }, { date: "2026-10", price: 185, label: "западный рынок" }] },
   limits: ["8 ГБ", "Нет FP16 и тензорных ядер", "Пассивное охлаждение в плоском корпусе перегревается"],
   links: [
     { label: "Обсуждение в r/homelab", url: "https://www.reddit.com/r/homelab/comments/1t3h53a/llm_people_how_do_we_feel_about_nvidia_tesla_p4_8gb/" },
-    { label: "llama.cpp CUDA-скорборд", url: "https://github.com/ggml-org/llama.cpp/discussions/15013" }
+    { label: "llama.cpp CUDA-скорборд", url: "https://github.com/ggml-org/llama.cpp/discussions/15013" },
+    { label: "什么值得买: P4 за ¥300 — за и против", url: "https://post.smzdm.com/p/akodm0qe/" }
   ]
 },
 
@@ -84,15 +85,17 @@ BLDL.gpus.push(
     { model: "Qwen3.5 35B MoE", quant: "Q4_K_M", ctx: 32768, backend: "llama.cpp", rig: "2×P40 на X99", tg: 35, pp: 250, src: "reddit-p40-p100", confidence: "reported", note: "Prefill падает до ~120 ток/с на 80k контекста" },
     { model: "Mixtral 8x7B", quant: "Q6_K", ctx: 8192, backend: "llama.cpp", rig: "2×P40", tg: 20, pp: null, src: "reddit-p40-guide", confidence: "reported" },
     { model: "Llama 3.1 70B (плотная)", quant: "Q4_0 (39 ГБ)", ctx: 4096, backend: "Ollama", rig: "4×P40 (96 ГБ)", tg: 0.033, pp: null, src: "tinycomputers", confidence: "measured", note: "1 токен за 30 секунд. Это эталон «так делать не надо»" },
-    { model: "Yi 34B", quant: "Q4_K_M", ctx: 14000, backend: "llama.cpp", rig: "1×P40", tg: 2.5, pp: null, src: "reddit-p40-p100", confidence: "reported" }
+    { model: "Yi 34B", quant: "Q4_K_M", ctx: 14000, backend: "llama.cpp", rig: "1×P40", tg: 2.5, pp: null, src: "reddit-p40-p100", confidence: "reported" },
+    { model: "Qwen2.5 14B", quant: "Q4", ctx: 8192, backend: "llama.cpp", rig: "1×P40 24 ГБ", tg: 16, pp: null, src: "insiderllm-p40", confidence: "measured", note: "Актуальный замер сентября 2026: 14B в Q4 — 16 ток/с, семёрка в Q4 — около 41 ток/с" }
   ],
   prices: {
     low: 150, high: 260, updated: "2026-10", currency: "USD", volatility: "средняя",
-    note: "Исторически была $160–200, в 2026 году подросла: спрос на дешёвую VRAM стабилен. Цена включает необходимость купить охлаждение (+$15–30).",
+    note: "По проданным лотам августа–сентября 2026: $220–290 за карту и $250–325 с готовым охлаждением. Исторически было $160–200; китайский рынок проходил через отметку ¥700 ещё до этого роста. Цена включает необходимость купить охлаждение (+$15–30).",
     history: [
       { date: "2023-11", price: 175, label: "пик популярности" },
       { date: "2025-03", price: 200, label: "" },
-      { date: "2026-10", price: 210, label: "текущий ориентир" }
+      { date: "2026-09", price: 255, label: "проданные лоты eBay" },
+      { date: "2026-10", price: 235, label: "текущий ориентир" }
     ]
   },
   limits: [
@@ -106,7 +109,8 @@ BLDL.gpus.push(
     { label: "Замеры P40/P100/V100 (prefill vs generation)", url: "https://medium.com/@przemyslaw.rafal.jez/we-benchmarked-polish-llms-on-used-p40-p100-and-v100-gpus-15870eb343bd" },
     { label: "4×P40 под Ollama: полный разбор", url: "https://tinycomputers.io/posts/repurposing-enterprise-gpus-the-tesla-p40-home-lab-story.html" },
     { label: "Русскоязычные тесты в LM Studio", url: "https://serverflow.ru/blog/stati/testiruem-tesla-p40-v-lm-studio-neyroseti-i-llm-na-windows/" },
-    { label: "P40 vs P100: почему FP16 у P40 срезан", url: "https://www.reddit.com/r/LocalLLaMA/comments/191yd31/p40_vs_p100_for_llms/" }
+    { label: "P40 vs P100: почему FP16 у P40 срезан", url: "https://www.reddit.com/r/LocalLLaMA/comments/191yd31/p40_vs_p100_for_llms/" },
+    { label: "InsiderLLM: актуальные цены и замеры (сентябрь 2026)", url: "https://insiderllm.com/guides/used-tesla-p40-local-ai/" }
   ]
 },
 
@@ -209,11 +213,12 @@ BLDL.gpus.push(
   mods: [],
   benchmarks: [
     { model: "Llama 3.1 8B", quant: "Q4_K_M", ctx: 8192, backend: "llama.cpp (GGUF)", rig: "1×M40 24 ГБ", tg: 10, pp: null, src: "reddit-battle-cheap", confidence: "measured", note: "Один из худших результатов в тесте дешёвых карт" },
-    { model: "Llama 2 13B", quant: "Q4_K_M", ctx: 8192, backend: "llama.cpp", rig: "1×M40", tg: 8, pp: null, src: "reddit-battle-cheap", confidence: "reported" }
+    { model: "Llama 2 13B", quant: "Q4_K_M", ctx: 8192, backend: "llama.cpp", rig: "1×M40", tg: 8, pp: null, src: "reddit-battle-cheap", confidence: "reported" },
+    { model: "Qwen3 32B", quant: "Q4", ctx: 8192, backend: "Ollama", rig: "1×M40 24 ГБ", tg: 4.28, pp: 35.1, src: "tencent-m40-mi50", confidence: "measured", note: "Прямое сравнение с MI50 на той же модели: 14.57 ток/с — разница в 3.4 раза. Prefill измерен на промпте из 170 токенов" }
   ],
-  prices: { low: 60, high: 130, updated: "2026-10", currency: "USD", volatility: "низкая", note: "Встречается и по $229 «с гарантией» — это переплата вдвое.", history: [{ date: "2026-10", price: 90, label: "" }] },
+  prices: { low: 60, high: 130, updated: "2026-10", currency: "USD", volatility: "низкая", note: "В Китае карта — прямой конкурент MI50 по цене (¥200–300 против ¥900), но по скорости проигрывает втрое на той же модели. Встречается и по $229 «с гарантией» — это переплата вдвое.", history: [{ date: "2026-10", price: 90, label: "" }] },
   limits: ["Maxwell без DP4A: GGUF-производительность разочаровывает", "Драйвер и CUDA на грани отключения поддержки", "Иногда попадаются карты с деградировавшей памятью"],
-  links: [{ label: "Сравнение дешёвых GPU (M40 в списке)", url: "https://www.reddit.com/r/LocalLLaMA/comments/1f6hjwf/battle_of_the_cheap_gpus_lllama_31_8b_gguf_vs/" }]
+  links: [{ label: "Сравнение дешёвых GPU (M40 в списке)", url: "https://www.reddit.com/r/LocalLLaMA/comments/1f6hjwf/battle_of_the_cheap_gpus_lllama_31_8b_gguf_vs/" }, { label: "腾讯云: M40 против MI50 на одной и той же модели", url: "https://cloud.tencent.com/developer/article/2529249" } ]
 },
 
 /* --------------------------------------------------------------------- T4 */

@@ -52,12 +52,17 @@ BLDL.gpus.push(
     { model: "Qwen3 30B-A3B (MoE)", quant: "Q5_K_M", ctx: 2048, backend: "llama.cpp (ROCm, FA)", rig: "1×MI50", tg: 75.7, pp: 587.9, src: "wtarreau-mi50", confidence: "measured" },
     { model: "Qwen3-VL 32B", quant: "Q4_K_M", ctx: 2048, backend: "llama.cpp (ROCm, FA)", rig: "1×MI50", tg: 19.8, pp: 216.4, src: "wtarreau-mi50", confidence: "measured" },
     { model: "Qwen3.6-8B", quant: "Q4_K_M", ctx: 8192, backend: "llama.cpp (ROCm), 2 карты", rig: "2×MI50", tg: 62, pp: null, src: "reddit-mi50-dual", confidence: "reported" },
-    { model: "Qwen3-VL-MoE 235B-A22B (MoE)", quant: "IQ1_S (50.7 ГБ)", ctx: 2048, backend: "llama.cpp (ROCm, 2 карты)", rig: "2×MI50", tg: 19.9, pp: 137.1, src: "wtarreau-mi50", confidence: "measured", note: "Модель на 235B параметров запускается на 64 ГБ: возможно только с MoE и агрессивной квантизацией" }
+    { model: "Qwen3-VL-MoE 235B-A22B (MoE)", quant: "IQ1_S (50.7 ГБ)", ctx: 2048, backend: "llama.cpp (ROCm, 2 карты)", rig: "2×MI50", tg: 19.9, pp: 137.1, src: "wtarreau-mi50", confidence: "measured", note: "Модель на 235B параметров запускается на 64 ГБ: возможно только с MoE и агрессивной квантизацией" },
+    { model: "Llama 3.3 70B", quant: "Q4_K_S (row-split)", ctx: 4096, backend: "llama.cpp (ROCm)", rig: "3×MI50 32 ГБ (96 ГБ), Xeon, DDR3 RDIMM", tg: 12.58, pp: 58.8, src: "v2ex-mi50", confidence: "measured", note: "Плотная 70B на бюджетном стенде: генерация терпимая, prefill — нет" },
+    { model: "Qwen 2.5 72B", quant: "Q4_K_S (layer-split)", ctx: 4096, backend: "llama.cpp (ROCm)", rig: "3×MI50 32 ГБ", tg: 9.85, pp: 75.72, src: "v2ex-mi50", confidence: "measured" },
+    { model: "QwQ-32B", quant: "Q4_K_S (row-split)", ctx: 4096, backend: "llama.cpp (ROCm)", rig: "2×MI50 32 ГБ", tg: 20.65, pp: 141.3, src: "v2ex-mi50", confidence: "measured", note: "Более удачный сценарий: 32B помещаются на две карты почти без потерь" },
+    { model: "Mistral Nemo 12B", quant: "Q8_0", ctx: 4096, backend: "llama.cpp (ROCm)", rig: "1×MI50 32 ГБ", tg: 35.92, pp: 482.98, src: "v2ex-mi50", confidence: "measured" },
+    { model: "Qwen3 32B", quant: "Q4", ctx: 8192, backend: "Ollama", rig: "1×MI50 32 ГБ", tg: 14.57, pp: 1393.9, src: "tencent-m40-mi50", confidence: "measured", note: "Prefill измерен на промпте из 166 токенов — именно на коротких промптах цифра выглядит внушительно" }
   ],
   prices: {
     low: 150, high: 600, updated: "2026-10", currency: "USD",
     volatility: "высокая",
-    note: "Разброс в разы: проверенные карты на AliExpress продают за $120–210, часть листингов на западных площадках просит $600–830. Реальная сделка — около $200. Всегда требуйте скриншот ROCm/llama-bench с карты до оплаты.",
+    note: "Разброс в разы: в Китае 32-гигабайтная карта долго стоила ¥900 (около $125), на западных площадках просят $600–830, а реальная сделка — около $200. Полный стенд на трёх MI50 из китайских комплектующих обходится в ¥3140, то есть меньше $500 со всей машиной. Всегда требуйте скриншот llama-bench с карты до оплаты.",
     history: [
       { date: "2024-09", price: 110, label: "пока никто не знал про gfx906" },
       { date: "2025-12", price: 150, label: "бум блогов о MI50" },
@@ -74,7 +79,9 @@ BLDL.gpus.push(
     { label: "Блог Willy Tarreau: полные llama-bench", url: "http://wtarreau.blogspot.com/2025/12/amd-radeon-instinct-mi50-32gb-best-ai.html" },
     { label: "Матрица замеров по квантизациям", url: "https://ahelpme.com/ai/llamacpp-ai/llama-bench-the-qwen3-6-27b-and-amd-radeon-instinct-mi50-32gb/" },
     { label: "Официально unsupported: разбор 2026", url: "https://openclawdc.com/blog/amd-mi50-32gb-local-llm/" },
-    { label: "Скорборд ROCm в llama.cpp", url: "https://github.com/ggml-org/llama.cpp/discussions/15021" }
+    { label: "Скорборд ROCm в llama.cpp", url: "https://github.com/ggml-org/llama.cpp/discussions/15021" },
+    { label: "V2EX: 70B на трёх MI50 за ¥3140 (полные замеры)", url: "https://www.v2ex.com/t/1102193" },
+    { label: "腾讯云: MI50 против M40 на одной модели", url: "https://cloud.tencent.com/developer/article/2529249" }
   ]
 },
 
@@ -237,7 +244,7 @@ BLDL.gpus.push(
     tdpNote: "Паспорт платы. Замеры: ~52 Вт среднее и 119 Вт пик по SMU-телеметрии; 240 Вт в простое и 390 Вт под нагрузкой по розетке (для двух плат)",
     connectors: "1×8-pin PCIe",
     cooling: "Штатный кулер платы + корпусный обдув",
-    measuredLoad: "130–155 Вт в работе, 35–60 Вт в простое без загруженной модели"
+    measuredLoad: "130–155 Вт в работе, 35–60 Вт в простое без загруженной модели. Отдельные замеры: 8 ядер на 3.7 ГГц — около 140 Вт, GPU-тест Furmark с 40 CU на 2 ГГц — 290 Вт из розетки"
   },
   software: {
     cuda: "—",
@@ -249,7 +256,10 @@ BLDL.gpus.push(
   mods: [
     { toolId: "bc250-bios", title: "Модифицированный BIOS", result: "Динамическое распределение VRAM/GTT, меню чипсета, fan control", soldering: false },
     { toolId: "bc250-40cu", title: "Патч 40 CU", result: "24 CU → 40 CU: prefill на 8B растёт с ~230 до ~371 ток/с", soldering: false },
-    { toolId: "mx-llama", title: "Vulkan-оптимизации форка llama.cpp", result: "37 → 55 ток/с на 9B Q4_K; в батче до 175 ток/с суммарно", soldering: false }
+    { toolId: "mx-llama", title: "Vulkan-оптимизации форка llama.cpp", result: "37 → 55 ток/с на 9B Q4_K; в батче до 175 ток/с суммарно", soldering: false },
+    { toolId: "bc250-cu-live-manager", title: "40 CU на лету", result: "Включение всех вычислительных блоков без пересборки модуля и перезагрузки — +61% к prefill", soldering: false },
+    { toolId: "bc250-core-unlock", title: "Восемь ядер Zen 2", result: "6 → 8 ядер: +5–7% в чувствительных к CPU задачах, для инференса выигрыш небольшой", soldering: false },
+    { toolId: "bc250-governor", title: "Ручное управление частотами", result: "Стабильные 1500 МГц / 900 мВ: 2 ГГц дают больше скорости, но упираются в 96 °C и троттлинг", soldering: false }
   ],
   benchmarks: [
     { model: "Qwen3 30B-A3B (MoE)", quant: "IQ2_M", ctx: 4096, backend: "llama.cpp (Vulkan)", rig: "1×BC-250, 24 CU", tg: 58.3, pp: null, src: "bc250-akandr", confidence: "measured" },
@@ -259,7 +269,9 @@ BLDL.gpus.push(
     { model: "Gemma 4 26B-A4B (MoE)", quant: "Q4", ctx: 24000, backend: "llama.cpp (Vulkan)", rig: "1×BC-250", tg: 69.7, pp: 449.8, src: "bc250-llama", confidence: "measured" },
     { model: "Qwen3.6 35B-A3B (MoE)", quant: "IQ2/Q3", ctx: 32768, backend: "Ollama (Vulkan)", rig: "1×BC-250, 16 ГБ", tg: 38, pp: null, src: "bc250-akandr", confidence: "measured", note: "「Почти потолок памяти» — так это описывает автор" },
     { model: "Qwen2.5-VL 32B (плотная)", quant: "Q4_K_XL", ctx: 16000, backend: "llama.cpp (Vulkan)", rig: "1×BC-250", tg: 8.6, pp: null, src: "reddit-bc250", confidence: "measured", note: "Плотная 32B на 16 ГБ с трудом: 8–10 ток/с" },
-    { model: "Gemma 12B", quant: "Q4", ctx: 8192, backend: "Vulkan, 40 CU @ 2050 МГц", rig: "1×BC-250 (разогнан)", tg: 35, pp: null, src: "reddit-bc250", confidence: "reported", note: "Диапазон 30–40 ток/с по сообщению владельца" }
+    { model: "Gemma 12B", quant: "Q4", ctx: 8192, backend: "Vulkan, 40 CU @ 2050 МГц", rig: "1×BC-250 (разогнан)", tg: 35, pp: null, src: "reddit-bc250", confidence: "reported", note: "Диапазон 30–40 ток/с по сообщению владельца" },
+    { model: "Qwen3.5-9B", quant: "Q4_K_XL", ctx: 512, backend: "llama.cpp (Vulkan)", rig: "BC-250: 24 CU против 40 CU", tg: null, pp: 372, src: "duggasco-bc250", confidence: "measured", note: "Prefill: 372 против 230 ток/с на 24 CU (+61%), потребление 95 → 125 Вт, температура +4 °C. На 2 ГГц — 466 ток/с, но 96 °C" },
+    { model: "Qwen3.5-35B-A3B (MoE)", quant: "Q4_K_M", ctx: 4096, backend: "llama.cpp (Vulkan), 40 CU", rig: "BC-250, 16 ГБ общей памяти", tg: 74.1, pp: null, src: "bc250-akandr", confidence: "measured", note: "На 24 CU та же конфигурация даёт 56.5 ток/с; на 64k контекста падает до 47.8 при 40 CU" }
   ],
   prices: {
     low: 100, high: 250, updated: "2026-10", currency: "USD",
@@ -284,7 +296,12 @@ BLDL.gpus.push(
     { label: "Патч 40 CU", url: "https://github.com/duggasco/bc250-40cu-unlock" },
     { label: "llama.cpp для BC-250 (Vulkan-оптимизации)", url: "https://github.com/TechMakesArt/llama.cpp-bc250" },
     { label: "Модифицированный BIOS", url: "https://gitlab.com/TuxThePenguin0/bc250-bios" },
-    { label: "Практика: ток/с, BIOS, VRAM", url: "https://www.reddit.com/r/LocalLLaMA/comments/1mqjdmn/did_anyone_tried_to_use_amd_bc250_for_inference/" }
+    { label: "Практика: ток/с, BIOS, VRAM", url: "https://www.reddit.com/r/LocalLLaMA/comments/1mqjdmn/did_anyone_tried_to_use_amd_bc250_for_inference/" },
+    { label: "duggasco: разблокировка 40 CU на уровне регистров + whitepaper", url: "https://github.com/duggasco/bc250-40cu-unlock" },
+    { label: "Неофициальный гайд сообщества (BIOS, CU, ядра, охлаждение)", url: "https://github.com/katzzero/bc250-unofficial-community-guide" },
+    { label: "bc250-llm-setup: скрипты для LLM-стенда", url: "https://github.com/wdonega/bc250-llm-setup" },
+    { label: "快科技: 40 CU и игровые тесты The Phawx", url: "https://news.mydrivers.com/1/1136/1136475.htm" },
+    { label: "Кластер из трёх BC-250 на Ansible", url: "https://ciroluciotecce.it/en/posts/bc250-cluster-inferenza-locale/" }
   ]
 }
 

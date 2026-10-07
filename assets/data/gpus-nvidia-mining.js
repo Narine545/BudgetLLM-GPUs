@@ -37,7 +37,7 @@ BLDL.gpus.push(
     type: "HBM2e (SK Hynix, 8-ГБ платы) либо HBM2 (Samsung, 10-ГБ платы)",
     busBits: 4096,
     bandwidth: 1493,
-    measuredBandwidth: "~770–930 ГБ/с по memtest_vulkan после разблокировки (зависит от бина)",
+    measuredBandwidth: "~770–930 ГБ/с по memtest_vulkan после разблокировки (зависит от бина); китайский слепой тест восьми карт дал ровно 1600 ГБ/с у всех до разблокировки",
     ecc: false
   },
   compute: {
@@ -84,12 +84,18 @@ BLDL.gpus.push(
     { model: "Qwen3.8-27B (INT8 + DFlash2)", quant: "INT8", ctx: 65536, backend: "vLLM", rig: "1×170HX 40 ГБ (Samsung)", tg: 97.8, pp: null, src: "cmp170hx-vllm", confidence: "measured", note: "8 параллельных потоков — 275 ток/с суммарно" },
     { model: "Qwen3.6-35B-A3B (MoE)", quant: "W8A8", ctx: 32768, backend: "vLLM + MTP2", rig: "1×170HX 64 ГБ", tg: 205, pp: 2950, src: "cmp170hx-bench", confidence: "measured", note: "PP указан ориентировочно для того же класса конфигураций" },
     { model: "Qwen3.6-27B", quant: "W4A16", ctx: 262144, backend: "vLLM, 2 карты TP+EP", rig: "2×170HX 64 ГБ", tg: 111, pp: 2295, src: "l1t-170hx", confidence: "measured", note: "prefill на 8k = 2476, на 262k = 2295 — почти без деградации" },
-    { model: "DeepSeek V4-Flash", quant: "—", ctx: 32768, backend: "vLLM + dspark", rig: "3×170HX", tg: 57, pp: 5000, src: "reddit-170hx-test", confidence: "reported", note: "Автор сообщает 57–123 ток/с в зависимости от контекста" }
+    { model: "DeepSeek V4-Flash", quant: "—", ctx: 32768, backend: "vLLM + dspark", rig: "3×170HX", tg: 57, pp: 5000, src: "reddit-170hx-test", confidence: "reported", note: "Автор сообщает 57–123 ток/с в зависимости от контекста" },
+    { model: "Qwen3-Next-80B-A3B (MoE)", quant: "AWQ 4-bit (45.85 ГиБ)", ctx: 32768, backend: "vLLM", rig: "1×170HX 64 ГБ, X99 + 2×E5-2680 v4", tg: 110, pp: null, src: "juejin-170hx", confidence: "reported", note: "Модель на 80 млрд параметров целиком на одной карте — то, что делают 64 ГБ HBM" },
+    { model: "Qwen 27B (FP16)", quant: "FP16, TP2", ctx: 262144, backend: "vLLM, 2 карты", rig: "2×170HX 64 ГБ", tg: 30, pp: null, src: "juejin-170hx", confidence: "reported", note: "Контекст 262k с полной точностью: скорость невелика, но объём позволяет" },
+    { model: "Qwen3.8-27B (W8A8 INT8, BF16 KV, MTP=3)", quant: "INT8", ctx: 32768, backend: "vLLM", rig: "1×170HX 64 ГБ", tg: 50, pp: 1500, src: "jxxy-170hx", confidence: "reported", note: "40–60 ток/с генерации без глубокой оптимизации; prefill 1500–4000 ток/с, потери от роста контекста почти нет" },
+    { model: "Qwen3.8-27B, 16 параллельных потоков", quant: "INT8", ctx: 8192, backend: "vLLM", rig: "1×170HX 64 ГБ, ~157 Вт", tg: 204.9, pp: null, src: "jxxy-170hx", confidence: "measured", note: "Суммарная пропускная способность на 16 запросах, TTFT 795 мс, 128 запросов пройдено целиком при 157 Вт" },
+    { model: "Llama 2 7B", quant: "Q4", ctx: 4096, backend: "llama.cpp", rig: "1×170HX 64 ГБ", tg: 145, pp: null, src: "zhihu-170hx-price", confidence: "reported", note: "129–156 ток/с в зависимости от прогона — маленькая модель разгоняется до предела пропускной способности" },
+    { model: "DeepSeek V4-Flash", quant: "—", ctx: 32768, backend: "vLLM", rig: "4×170HX 64 ГБ (256 ГБ)", tg: 98, pp: 5300, src: "zhihu-170hx-price", confidence: "reported", note: "Мультикарточная схема без P2P по Gen2 x4: decode держится, prefill в 4 раза лучше одиночной карты" }
   ],
   prices: {
     low: 1000, high: 2000, updated: "2026-10", currency: "USD",
     volatility: "экстремальная",
-    note: "До разблокировки карта стоила $100–250 и считалась мусором. После публикации эксплойта (август 2026) проданные лоты ушли за $1000+, часть продавцов просит $2000. Покупая дороже, вы платите за новость, а не за железо.",
+    note: "До разблокировки карта стоила $100–250 и считалась мусором. После публикации эксплойта (август 2026) проданные лоты ушли за $1000+, часть продавцов просит $2000. В Китае цена выросла в десять раз за считанные дни, и там же появились карты «с одним живым стеком памяти» — при покупке через 闲鱼 требуйте видео с nvidia-smi и прогон памяти.",
     history: [
       { date: "2026-06", price: 200, label: "до эксплойта" },
       { date: "2026-07", price: 250, label: "первые отчёты" },
@@ -109,7 +115,10 @@ BLDL.gpus.push(
     { label: "LTT Labs: тест до и после", url: "https://www.lttlabs.com/articles/2026/09/12/cmp-170hx-cmpunlocker" },
     { label: "Отчёт: 84 ток/с, 262k контекста", url: "https://www.reddit.com/r/LocalLLM/comments/1vw09b1/i_unlocked_a_800_mining_gpu_into_a_64gb/" },
     { label: "Предупреждение о покупке на Alibaba", url: "https://www.reddit.com/r/LocalLLaMA/comments/1v2fm3s/be_careful_when_purchasing_cmp_170hx_on_alibaba/" },
-    { label: "arXiv: анализ производительности 170HX", url: "https://arxiv.org/pdf/2505.03782" }
+    { label: "arXiv: анализ производительности 170HX", url: "https://arxiv.org/pdf/2505.03782" },
+    { label: "掘金: полный разбор разблокировки (8 ГБ → 64 ГБ)", url: "https://juejin.cn/post/7684049880511709236" },
+    { label: "Китайский обзор: 170HX как AI-сервер, конкурентные замеры", url: "https://www.jxxy.net/ai/articles/nvidia-cmp-170hx-ai-server-revival/" },
+    { label: "知乎: рост цен в 10 раз и замеры на 4 картах", url: "https://zhuanlan.zhihu.com/p/2073756134234765056" }
   ]
 },
 
@@ -481,16 +490,17 @@ BLDL.gpus.push(
   memory: { stock: 6, mod: null, type: "GDDR5", busBits: 192, bandwidth: 192, ecc: false },
   compute: { cores: 1280, coreLabel: "CUDA-ядер", sms: "—", tensor: "Нет", fp32: 4.4, fp16: "—", int8: "≈26 TOPS", notes: "Класс GTX 1060 6 ГБ, но с урезанной шиной" },
   io: { pcieGen: 1, pcieLanes: 16, pcieNote: "Gen1.1: ≈4 ГБ/с максимум, а в x8-слоте — 2 ГБ/с", videoOut: false, nvlink: false, rebar: "—" },
-  power: { tdp: 120, connectors: "1×6-pin", cooling: "Активное у большинства экземпляров", measuredLoad: "—" },
+  power: { tdp: 120, connectors: "1×6-pin", cooling: "Активное у большинства экземпляров", measuredLoad: "До 100 Вт под нагрузкой при 80 °C и слышимом вентиляторе; около половины скорости RTX 2060 Super в генерации изображений" },
   software: { cuda: "sm_61", driver: "Обычно работает и без патча — самая «дружелюбная» из P10x", backends: ["llama.cpp (CUDA)", "Vulkan"], os: "Linux / Windows", notes: "" },
   mods: [],
   benchmarks: [
     { model: "Llama 2 7B", quant: "Q4_0", ctx: 4096, backend: "llama.cpp (CUDA)", rig: "1×P106-100", tg: 30.4, pp: 406.9, src: "scoreboard-cuda", confidence: "measured" },
-    { model: "Llama 2 7B", quant: "Q4_0", ctx: 4096, backend: "llama.cpp (Vulkan)", rig: "1×P106-100", tg: 29.8, pp: 183.8, src: "scoreboard-vulkan", confidence: "measured" }
+    { model: "Llama 2 7B", quant: "Q4_0", ctx: 4096, backend: "llama.cpp (Vulkan)", rig: "1×P106-100", tg: 29.8, pp: 183.8, src: "scoreboard-vulkan", confidence: "measured" },
+    { model: "Qwen 14B", quant: "Q4, частичная выгрузка", ctx: 4096, backend: "Ollama", rig: "1×P106-100 + рабочая станция", tg: 1.9, pp: null, src: "zhihu-cpu-only-fail", confidence: "measured", note: "Тот же тест на CPU без карты — 1.54 ток/с, на голом серверном железе 32B — 0.82. Карта уровня P106 меняет картину мало" }
   ],
-  prices: { low: 20, high: 45, updated: "2026-09", currency: "USD", volatility: "низкая", note: "Цена одной пиццы за карту с CUDA.", history: [{ date: "2026-09", price: 30, label: "" }] },
-  limits: ["6 ГБ — жёсткий потолок", "Gen1 x16 по 4 ГБ/с", "Нет FP16-путей"],
-  links: [{ label: "llama.cpp CUDA-скорборд", url: "https://github.com/ggml-org/llama.cpp/discussions/15013" }]
+  prices: { low: 15, high: 45, updated: "2026-10", currency: "USD", volatility: "низкая", note: "Цена одной пиццы за карту с CUDA. В Китае такие карты уходят за ¥50–100, а версия P106-090 (3 ГБ, PCIe x4 1.1) — ещё дешевле. Оба варианта продаются без гарантии.", history: [{ date: "2026-06", price: 25, label: "наплыв списанных карт" }, { date: "2026-10", price: 30, label: "текущий ориентир" }] },
+  limits: ["6 ГБ — жёсткий потолок", "Gen1 x16 по 4 ГБ/с", "Нет FP16-путей", "Версия P106-090 отличается радикально: 3 ГБ и PCIe x4 1.1 — для LLM она не годится совсем"],
+  links: [{ label: "llama.cpp CUDA-скорборд", url: "https://github.com/ggml-org/llama.cpp/discussions/15013" }, { label: "知乎: почему сервер без GPU проигрывает даже P106", url: "https://zhuanlan.zhihu.com/p/28904808972" }, { label: "什么值得买: замеры потребления и температур P106-100", url: "https://post.smzdm.com/p/a0q2nd0z/" } ]
 },
 
 /* ----------------------------------------------------------- Titan V (майнинг) */

@@ -443,4 +443,102 @@ BLDL.tools = [
     appearsAs: "может определиться как P104-100 или GTX 1080 Ti",
     sources: ["respec-mining", "nvcleanstall-tpu"]
   }
+
+,
+  {
+    id: "bc250-cu-live-manager",
+    name: "bc250-cu-live-manager: 40 CU на лету",
+    url: "https://github.com/WinnieLV/bc250-cu-live-manager",
+    author: "WinnieLV (сообщество BC-250)",
+    type: "unlock",
+    cards: ["BC-250"],
+    difficulty: "low",
+    soldering: false,
+    risk: "medium",
+    status: "active",
+    summary: "Включает все 40 CU через TUI-интерфейс прямо в работающей системе: без пересборки модуля amdgpu, без правки GRUB и без перезагрузки. Штатное ядро — в этом главное отличие от патча модуля.",
+    unlocks: [
+      { feature: "40 CU вместо 24 (без перезагрузки)", status: "работает" },
+      { feature: "Требуется прошивка модуля ядра", status: "не требуется" },
+      { feature: "Сохраняется после обновления ядра", status: "не сохраняется — включать заново" }
+    ],
+    requires: ["Linux с работающим amdgpu", "Права root", "Понимание, что разблокировка 40 CU поднимает потребление примерно на 30 Вт"],
+    caveats: [
+      "Карта не будет показывать 40 CU ни в одном диагностическом инструменте — проверять только по фактическому ускорению prefill.",
+      "Как и любой разгон, разблокировка требует нормального охлаждения: штатный радиатор рассчитан на 24 CU.",
+      "Способ живёт в оперативной памяти модуля: после перезагрузки процедуру нужно повторить (для этого есть systemd-юнит)."
+    ],
+    appearsAs: "без изменений в lspci; подтверждается только тестом производительности",
+    sources: ["bc250-live-manager", "katzzero-bc250"]
+  },
+  {
+    id: "bc250-core-unlock",
+    name: "Разблокировка восьми ядер Zen 2 на BC-250",
+    url: "https://github.com/GabriWar/bc250-core-cu-unlock",
+    author: "GabriWar, Hexxeh, RescueMei",
+    type: "unlock",
+    cards: ["BC-250"],
+    difficulty: "medium",
+    soldering: false,
+    risk: "medium",
+    status: "active",
+    summary: "Плата несёт восемь ядер Zen 2, но по умолчанию активны шесть. Ядро и CU можно открыть сосуществующими способами: через SMU-mailbox из Linux (0x98), EFI-шимом при загрузке или правкой BIOS.",
+    unlocks: [
+      { feature: "8 ядер вместо 6 (+5–7 % в задачах, чувствительных к CPU)", status: "работает" },
+      { feature: "Процессорный тест: 3850 МГц на 6 ядрах / 3700 МГц на 8", status: "измерено" },
+      { feature: "Постоянная разблокировка через BIOS", status: "рискованно" }
+    ],
+    requires: ["Выбор одного из трёх способов по уровню риска", "Наличие программатора CH341A, если идёте путём прошивки BIOS"],
+    caveats: [
+      "Правка BIOS необратима программно: при неудаче нужен внешний программатор.",
+      "SMU-способ откатывается при холодной загрузке — это и есть страховка.",
+      "На тестах восемь ядер дают 5–7 % в играх; в LLM-инференсе выигрыш ещё меньше, потому что узкое место — память и GPU."
+    ],
+    appearsAs: "8 логических ядер в lscpu; отдельного «разблокированного» имени в системе нет",
+    sources: ["bc250-core-unlock", "katzzero-bc250", "reddit-bc250-cpu"]
+  },
+  {
+    id: "bc250-governor",
+    name: "cyan-skillfish-governor (SMU-управление)",
+    url: "https://github.com/filippor/cyan-skillfish-governor",
+    author: "filippor",
+    type: "tuning",
+    cards: ["BC-250"],
+    difficulty: "medium",
+    soldering: false,
+    risk: "low",
+    status: "active",
+    summary: "Управление частотами и напряжением через SMU. Сообщество называет governor обязательным: без него плата либо держит заниженные частоты, либо уходит в троттлинг с разблокированными CU.",
+    unlocks: [
+      { feature: "Понятные кривые частоты/напряжения", status: "работает" },
+      { feature: "Стабильность при 40 CU", status: "подтверждено сообществом" }
+    ],
+    requires: ["Сборка из исходников или пакет дистрибутива", "Понимание, что 1500 МГц / 900 мВ — рекомендованная точка, а не 2 ГГц"],
+    caveats: ["Замеры: на 2 ГГц prefill выше, но температура доходит до 96 °C — карта уходит в троттлинг и обгонять уже не обгоняет."],
+    appearsAs: "без изменений в системе; частоты видны в amdgpu-сенсорах",
+    sources: ["cyan-governor", "duggasco-bc250"]
+  },
+  {
+    id: "bc250-llm-setup",
+    name: "bc250-llm-setup: автоматизация всего стенда",
+    url: "https://github.com/wdonega/bc250-llm-setup",
+    author: "wdonega",
+    type: "runtime",
+    cards: ["BC-250"],
+    difficulty: "low",
+    soldering: false,
+    risk: "low",
+    status: "active",
+    summary: "Набор пронумерованных скриптов: проверка железа, драйверы Mesa/RADV, датчики, подъём лимитов TTM/GTT, сборка llama.cpp с Vulkan и RPC, governor, разблокировка 40 CU и systemd-сервисы для узла кластера.",
+    unlocks: [
+      { feature: "Готовый воспроизводимый стенд под инференс", status: "работает" },
+      { feature: "RPC-узел для распределённого инференса", status: "работает" },
+      { feature: "Сохраняет 40 CU после обновления ядра", status: "нет — предупреждает об этом отдельно" }
+    ],
+    requires: ["Любой Linux с apt или dnf", "Python не требуется — только shell"],
+    caveats: ["Скрипты рассчитаны на чистую установку: на уже настроенной системе часть шагов придётся выполнять вручную."],
+    appearsAs: "шкала из десяти скриптов 00-preflight … 90-validate",
+    sources: ["wdonega-bc250", "katzzero-bc250"]
+  }
+
 ];

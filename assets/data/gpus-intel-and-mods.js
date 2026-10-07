@@ -122,15 +122,21 @@ BLDL.gpus.push(
   mods: [{ toolId: "vram-mod-2080ti", title: "Мод 11 → 22 ГБ", result: "Удвоение VRAM без изменения чипа", soldering: true }],
   benchmarks: [
     { model: "Qwen3.6-27B (MTP2)", quant: "Q6", ctx: 8192, backend: "llama.cpp + MTP", rig: "2×RTX 2080 Ti 22 ГБ", tg: 46, pp: null, src: "cmp170hx-bench", confidence: "measured", note: "В сравнительной таблице против 170HX (97 ток/с на W8A8) — то есть две 2080 Ti дают меньше половины" },
-    { model: "Llama 3.1 8B", quant: "Q4_K_M", ctx: 8192, backend: "llama.cpp (CUDA)", rig: "1×2080 Ti (11 ГБ)", tg: 60, pp: 1400, src: null, confidence: "estimated", note: "Оценка по классу Turing: прямых замеров на 22-ГБ версии в источниках мало, потому что скорость равна обычной 2080 Ti" }
+    { model: "Llama 3.1 8B", quant: "Q4_K_M", ctx: 8192, backend: "llama.cpp (CUDA)", rig: "1×2080 Ti (11 ГБ)", tg: 60, pp: 1400, src: null, confidence: "estimated", note: "Оценка по классу Turing: прямых замеров на 22-ГБ версии в источниках мало, потому что скорость равна обычной 2080 Ti" },
+    { model: "Qwen3.6-35B-A3B (MoE)", quant: "Q8_0", ctx: 8192, backend: "llama.cpp", rig: "3×2080 Ti 22 ГБ, 47 ГБ занято", tg: 73, pp: null, src: "smzdm-2080ti-22g", confidence: "measured", note: "Контекст 256k: 73 ток/с на пустом, 72 на 20k, 52 на 50k, 36 на 100k" },
+    { model: "Qwen3.6-35B-A3B (MoE)", quant: "Q4, всё на GPU", ctx: 32768, backend: "Ollama / llama.cpp", rig: "1×2080 Ti 22 ГБ", tg: 44, pp: 900, src: "smzdm-2080ti-256k", confidence: "measured", note: "Промпт до 1113 ток/с. Главный вывод автора: частичная выгрузка экспертов на CPU давала вдвое меньше — 19 ток/с" },
+    { model: "Qwen3.8-27B", quant: "FP8 + MTP3", ctx: 131072, backend: "vLLM, TP2 + NVLink", rig: "2×2080 Ti 22 ГБ", tg: 80, pp: null, src: "smzdm-2080ti-price", confidence: "reported", note: "В реальных проектах владельцы получают 50–70 ток/с — цифры зависят от длины ответа" },
+    { model: "Qwen3.8-27B", quant: "Q4_K_XL (17.9 ГБ)", ctx: 153600, backend: "llama.cpp", rig: "1×2080 Ti 22 ГБ", tg: 45, pp: null, src: "smzdm-2080ti-price", confidence: "reported" },
+    { model: "DeepSeek-R1 671B", quant: "Q4 (404 ГБ весов)", ctx: 4096, backend: "Ollama, GGML_CUDA_ENABLE_UNIFIED_MEMORY=1", rig: "4×2080 Ti 22 ГБ + 256 ГБ RAM", tg: 2.18, pp: null, src: "csdn-2080ti-671b", confidence: "reported", note: "Гибрид VRAM и системной памяти: работает, но 2 ток/с — это демонстрация, а не рабочий режим" }
   ],
   prices: {
     low: 350, high: 520, updated: "2026-10", currency: "USD",
     volatility: "высокая",
-    note: "Гонконгские продавцы на eBay — $499, китайские площадки — от $350 (без доставки и налогов). Реальная стоимость с доставкой часто ближе к $500. В 2024-м цена была ниже на $100–150.",
+    note: "Гонконгские продавцы на eBay — $499, китайские площадки — от $350 (без доставки и налогов). Реальная стоимость с доставкой часто ближе к $500. В Китае цена держалась на ¥2500 и подскочила до ¥3000 после вирусного видео о локальном ИИ — типичная реакция этого рынка на хайп. В 2024-м было на $100–150 дешевле.",
     history: [
       { date: "2024-02", price: 350, label: "мастерские в Шэньчжэне" },
       { date: "2026-08", price: 499, label: "волна листингов на eBay" },
+      { date: "2026-09", price: 420, label: "¥2500 до вирусного видео" },
       { date: "2026-10", price: 470, label: "текущий ориентир" }
     ]
   },
@@ -142,7 +148,11 @@ BLDL.gpus.push(
   links: [
     { label: "Tom's Hardware: как делают мод 22 ГБ", url: "https://www.tomshardware.com/pc-components/gpus/chinese-workshops-recondition-nvidias-old-flagship-gaming-gpu-for-ai-rtx-2080-ti-upgraded-to-22gb-for-dollar499" },
     { label: "Обсуждение мода в r/LocalLLaMA", url: "https://www.reddit.com/r/LocalLLaMA/comments/18kgr9m/worth_it_to_buy_a_modded_22gb_2080ti_for_llms/" },
-    { label: "Разбор рисков мода", url: "https://www.itechguides.com/if-nvidia-wont-add-enough-vram-modders-will-22gb-rtx-2080-ti-cards-for-less-than-500/" }
+    { label: "Разбор рисков мода", url: "https://www.itechguides.com/if-nvidia-wont-add-enough-vram-modders-will-22gb-rtx-2080-ti-cards-for-less-than-500/" },
+    { label: "什么值得买: сводка замеров по 22-гигабайтным картам", url: "https://post.smzdm.com/p/anvq9ovv/" },
+    { label: "知乎: 43–45 ток/с на Qwen3.6-35B-A3B", url: "https://zhuanlan.zhihu.com/p/2036104742041019044" },
+    { label: "什么值得买: как хайп поднял цену и что показывают две карты", url: "https://post.smzdm.com/p/anv32g23/" },
+    { label: "CSDN: 671B в Q4 на четырёх картах и системной памяти", url: "https://blog.csdn.net/xianyun_0355/article/details/145823004" }
   ]
 },
 
@@ -168,7 +178,7 @@ BLDL.gpus.push(
   benchmarks: [],
   prices: { low: 700, high: 1200, updated: "2026-10", currency: "USD", volatility: "высокая", note: "За эти деньги уже покупается V100 32 ГБ или две MI50. Смысл — только если нужен именно CUDA + 44 ГБ на одной карте.", history: [{ date: "2026-10", price: 900, label: "" }] },
   limits: ["Штучно", "ПСП прежняя", "Нет внятных публичных замеров"],
-  links: [{ label: "Упоминание 44-ГБ мода", url: "https://videocardz.com/newz/geforce-rtx-2080-ti-with-upgraded-22gb-memory-for-ai-workloads-lands-on-ebay-for-500" }]
+  links: [{ label: "Упоминание 44-ГБ мода", url: "https://videocardz.com/newz/geforce-rtx-2080-ti-with-upgraded-22gb-memory-for-ai-workloads-lands-on-ebay-for-500" }, { label: "Китайский рынок модов VRAM: цены и варианты", url: "https://post.smzdm.com/p/anv32g23/" } ]
 },
 
 /* ---------------------------------------------------------------- 1080 Ti */
