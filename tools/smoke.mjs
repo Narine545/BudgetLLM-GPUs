@@ -167,6 +167,40 @@ for (const [hash, checks] of [
   }
 }
 
+/* --- языки -------------------------------------------------------------- */
+const langButtons = [...doc.querySelectorAll(".lang-btn[data-lang]")];
+expect(langButtons.length >= 3, `в шапке ${langButtons.length} кнопок языка — ожидалось минимум 3`);
+expect(langButtons.every((b) => b.querySelector("svg")), "у кнопок языка нет инлайн-флагов (svg)");
+expect(![...doc.querySelectorAll(".lang-btn img")].length, "флаги грузятся картинками — офлайн-режим сломается");
+
+const cyrillic = /[А-Яа-яЁё]/;
+const navCatalog = doc.querySelector('#tabs a[data-route="catalog"]');
+const navRu = navCatalog.textContent.trim();
+
+const en = doc.querySelector('.lang-btn[data-lang="en"]');
+en.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+await wait(150);
+expect(navCatalog.textContent.trim() !== navRu, "переключение на английский не изменило навигацию");
+expect(!cyrillic.test(doc.querySelector("#view h2").textContent), "заголовок вида остался русским при английском языке");
+expect(doc.documentElement.getAttribute("lang") === "en", "атрибут lang документа не переключился");
+try {
+  // На opaque origin (file://) localStorage может быть недоступен — это допустимо.
+  if (window.localStorage) {
+    expect(window.localStorage.getItem("bldl-lang") === "en", "выбор языка не сохраняется в localStorage");
+  }
+} catch (e) { /* приватный режим или file:// — пропускаем */ }
+
+const zh = doc.querySelector('.lang-btn[data-lang="zh"]');
+zh.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+await wait(150);
+expect(!cyrillic.test(doc.querySelector("#tabs").textContent), "разделы навигации остались русскими при китайском языке");
+
+const ru = doc.querySelector('.lang-btn[data-lang="ru"]');
+ru.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
+await wait(150);
+expect(navCatalog.textContent.trim() === navRu, "возврат к русскому не восстановил исходные подписи");
+expect(doc.documentElement.getAttribute("lang") === "ru", "атрибут lang не вернулся к ru");
+
 /* --- ссылки ------------------------------------------------------------- */
 const badLinks = [...doc.querySelectorAll("#view a[href^='http']")].filter((a) => !/^https?:\/\//.test(a.getAttribute("href")));
 expect(!badLinks.length, "есть ссылки без http(s)");

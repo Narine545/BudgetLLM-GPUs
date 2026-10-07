@@ -95,6 +95,55 @@
     return null;
   }
 
+  /* ======================= язык интерфейса ============================ */
+
+  function flagSVG(code) {
+    if (code === "ru") {
+      return '<svg viewBox="0 0 30 20" width="22" height="15" aria-hidden="true">' +
+        '<rect width="30" height="20" fill="#fff"/><rect y="6.67" width="30" height="6.66" fill="#0039a6"/>' +
+        '<rect y="13.33" width="30" height="6.67" fill="#d52b1e"/></svg>';
+    }
+    if (code === "us") {
+      var stripes = "";
+      for (var i = 0; i < 13; i++) {
+        stripes += '<rect y="' + (i * 20 / 13).toFixed(2) + '" width="30" height="' + (20 / 13).toFixed(2) +
+          '" fill="' + (i % 2 ? "#fff" : "#b22234") + '"/>';
+      }
+      var stars = "";
+      for (var r = 0; r < 4; r++) for (var c = 0; c < 5; c++) {
+        stars += '<circle cx="' + (1.6 + c * 1.9).toFixed(2) + '" cy="' + (1.6 + r * 2.1).toFixed(2) + '" r="0.55" fill="#fff"/>';
+      }
+      return '<svg viewBox="0 0 30 20" width="22" height="15" aria-hidden="true">' + stripes +
+        '<rect width="12" height="10.8" fill="#3c3b6e"/>' + stars + "</svg>";
+    }
+    return '<svg viewBox="0 0 30 20" width="22" height="15" aria-hidden="true">' +
+      '<rect width="30" height="20" fill="#de2910"/>' +
+      '<text x="6" y="10" font-size="7.4" fill="#ffde00" text-anchor="middle" dominant-baseline="middle">★</text>' +
+      '<text x="11.6" y="4.6" font-size="2.9" fill="#ffde00" text-anchor="middle">★</text>' +
+      '<text x="14.2" y="8.4" font-size="2.9" fill="#ffde00" text-anchor="middle">★</text>' +
+      '<text x="14.2" y="13.4" font-size="2.9" fill="#ffde00" text-anchor="middle">★</text>' +
+      '<text x="11.6" y="16.6" font-size="2.9" fill="#ffde00" text-anchor="middle">★</text></svg>';
+  }
+
+  function renderLangSwitch() {
+    var host = document.getElementById("lang-switch");
+    if (!host) return;
+    host.innerHTML = (BLDL.langs || []).map(function (l) {
+      return '<button type="button" class="lang-btn" data-lang="' + esc(l.code) + '"' +
+        ' aria-pressed="' + (l.code === BLDL.lang) + '" title="' + esc(l.title || l.label) + '">' +
+        flagSVG(l.flag) + '<span>' + esc(l.short || l.label) + "</span></button>";
+    }).join("");
+  }
+
+  function applyLang(code) {
+    BLDL.setLang(code);
+    document.documentElement.setAttribute("lang", code);
+    BLDL.restore(document.body);
+    renderLangSwitch();
+    render();
+    BLDL.localize(document.body);
+  }
+
   /* ======================= тема и шапка =============================== */
 
   function initTheme() {
@@ -797,6 +846,8 @@
     try { window.scrollTo(0, 0); } catch (e) { /* окружения без скролла (тесты, встраивание) */ }
     observeReveal();
     animateBars();
+    // Тексты внутри вида приходят из данных по-русски — переводим их сразу после отрисовки.
+    if (BLDL.localize) BLDL.localize(host);
   }
 
   function restoreCatalogControls() {
@@ -848,6 +899,9 @@
       var t = ev.target;
       if (!t || !t.closest) return;
       if (t.closest("#theme-toggle")) { toggleTheme(); return; }
+
+      var langBtn = t.closest(".lang-btn[data-lang]");
+      if (langBtn) { applyLang(langBtn.getAttribute("data-lang")); return; }
 
       var chip = t.closest("#toolbar .chip[data-cat]");
       if (chip) {
@@ -914,9 +968,11 @@
 
   function boot() {
     initTheme();
+    document.documentElement.setAttribute("lang", BLDL.lang || "ru");
     document.body.setAttribute("data-booted", "1");
     var fb = document.getElementById("boot-fallback");
     if (fb && fb.parentNode) fb.parentNode.removeChild(fb);
+    renderLangSwitch();
     renderHeroStats();
     var fv = document.getElementById("footer-version");
     if (fv) fv.textContent = "Версия данных " + (META.version || "—") + " · обновлено " + (META.updated || "—");

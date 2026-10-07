@@ -176,6 +176,27 @@ body[data-booted="1"] #boot-fallback { display: none; }
   font-variant-numeric: tabular-nums; line-height: 1.15;
 }
 
+/* --- переключатели в шапке ----------------------------------------------- */
+.masthead-controls { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }
+.lang-switch {
+  display: inline-flex; gap: .15rem; padding: .18rem; border-radius: 999px;
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+.lang-btn {
+  display: inline-flex; align-items: center; gap: .38rem;
+  padding: .28rem .55rem; border: 0; border-radius: 999px;
+  background: transparent; color: var(--text-soft); font: inherit; font-size: .82rem;
+  cursor: pointer; transition: background var(--dur) var(--ease), color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.lang-btn svg { display: block; border-radius: 2.5px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--text) 18%, transparent); }
+.lang-btn:hover { background: var(--surface-3); color: var(--text); }
+.lang-btn[aria-pressed="true"] {
+  background: var(--surface); color: var(--text); font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.lang-btn[aria-pressed="true"] svg { box-shadow: 0 0 0 1px var(--accent); }
+@media (max-width: 560px) { .lang-btn span { display: none; } }
+
 /* --- вкладки ------------------------------------------------------------- */
 .tabs {
   display: flex; gap: .2rem; flex-wrap: wrap; margin-top: 1.5rem;

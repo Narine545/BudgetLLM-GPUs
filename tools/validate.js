@@ -234,7 +234,40 @@ if (!fs.existsSync(indexPath)) {
   }
 }
 
-/* --- 7. Отчёт ---------------------------------------------------------- */
+/* --- 7. Локализация ---------------------------------------------------- */
+(function checkI18n() {
+  const dir = path.join(ROOT, "assets", "i18n");
+  const runtime = path.join(ROOT, "assets", "js", "i18n.js");
+  if (!fs.existsSync(runtime)) { fail("нет assets/js/i18n.js — переключатель языка не заработает"); return; }
+  if (!fs.existsSync(dir)) { fail("нет каталога assets/i18n со словарями"); return; }
+
+  // список языков должен совпадать со словарями
+  const runtimeSrc = fs.readFileSync(runtime, "utf8");
+  const declared = [...runtimeSrc.matchAll(/\{\s*code:\s*"(\w+)"/g)].map((m) => m[1]);
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".js") && !f.startsWith("_")).map((f) => f.replace(/\.js$/, ""));
+  if (!declared.includes("ru")) fail("русский язык должен быть в списке языков по умолчанию");
+  for (const code of declared) {
+    if (code !== "ru" && !files.includes(code)) fail(`язык «${code}» объявлен, но словаря assets/i18n/${code}.js нет`);
+  }
+  for (const code of files) {
+    if (!declared.includes(code)) fail(`есть словарь ${code}.js, но язык не объявлен в i18n.js`);
+  }
+
+  const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+  for (const code of files) {
+    if (!html.includes(`assets/i18n/${code}.js`)) fail(`словарь ${code}.js не подключён в index.html`);
+    const src = fs.readFileSync(path.join(dir, `${code}.js`), "utf8");
+    if (!/BLDL\.i18n\.\w+\s*=\s*\{/.test(src)) fail(`${code}.js не похож на словарь (нет BLDL.i18n.${code} = {...})`);
+    if (!/strings:\s*\{/.test(src)) fail(`в ${code}.js нет секции strings`);
+    if (!/rules:\s*\[/.test(src)) warn(`в ${code}.js нет секции rules — подстановки вроде «Показано N из M» не переведутся`);
+  }
+  if (!html.includes('id="lang-switch"')) fail("в index.html нет контейнера переключателя языков");
+  if (!/<svg/.test(runtimeSrc) && !/svg/i.test(fs.readFileSync(path.join(ROOT, "assets", "js", "app.js"), "utf8"))) {
+    warn("флаги рисуются не инлайн-SVG: офлайн-режим может пострадать");
+  }
+})();
+
+/* --- 8. Отчёт ---------------------------------------------------------- */
 const stats = {
   "карт": GPUS.length,
   "замеров": GPUS.reduce((n, g) => n + (g.benchmarks || []).length, 0),
